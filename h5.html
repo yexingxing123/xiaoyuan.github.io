@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>电商小程序</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            min-height: 100vh;
+            position: relative;
+            padding-bottom: 60px;
+        }
+
+        /* 页面容器 */
+        .page {
+            display: none;
+            padding-bottom: 20px;
+        }
+
+        .active {
+            display: block;
+        }
+
+        /* 顶部导航 */
+        .header {
+            background: linear-gradient(135deg, #87CEFA, #ffffff);
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .header h1 {
+            font-size: 18px;
+        }
+
+        .back-btn {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        /* 轮播图 */
+        .banner-container {
+            position: relative;
+            height: 320px;
+            overflow: hidden;
+            border-radius: 0 0 15px 15px;
+            margin-bottom: 15px;
+        }
+
+        .banner {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 100%;
+        }
+
+        .banner-item {
+            min-width: 100%;
+            height: 100%;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .banner-indicators {
+            position: absolute;
+            bottom: 10px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255,255,255,0.5);
+        }
+
+        .indicator.active {
+            background-color: white;
+        }
+
+        /* 产品分类 */
+        .section-title {
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .section-title span {
+            color: #ff6b6b;
+            font-size: 14px;
+        }
+
+        .category-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            padding: 0 15px;
+        }
+
+        .category-item {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+            cursor: pointer;
+        }
+
+        .category-item:hover {
+            transform: translateY(-5px);
+        }
+
+        .category-img {
+            height: 120px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .category-info {
+            padding: 10px;
+        }
+
+        .category-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .category-price {
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+
+         /* 产品详情页 */
+        .product-detail {
+            background: white;
+            border-radius: 15px;
+            margin: 15px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .product-image {
+            height: 300px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .product-info {
+            padding: 20px;
+        }
+
+        .product-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .product-description {
+            color: #666;
+            margin-bottom: 15px;
+            line-height: 1.5;
+        }
+
+        .product-price {
+            font-size: 24px;
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* 选项组 */
+        .option-group {
+            margin-bottom: 20px;
+        }
+
+        .option-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .option-required {
+            color: #ff6b6b;
+            font-size: 12px;
+        }
+
+        .option-items {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .option-item {
+            padding: 8px 15px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option-item.selected {
+            background: #ff6b6b;
+            color: white;
+            border-color: #ff6b6b;
+        }
+
+        /* 加入购物车按钮 */
+        .add-to-cart-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            width: 100%;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 4px 10px rgba(255, 107, 107, 0.3);
+        }
+
+        .add-to-cart-btn:hover {
+            background: #ff5252;
+        }
+
+        /* 购物车 */
+        .cart-item {
+            display: flex;
+            background: white;
+            margin: 10px 15px;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .cart-img {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            margin-right: 15px;
+        }
+
+        .cart-info {
+            flex: 1;
+        }
+
+        .cart-name {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .cart-price {
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .cart-actions {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+        }
+
+        .quantity-btn {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .quantity {
+            margin: 0 10px;
+            font-weight: bold;
+        }
+
+        .delete-btn {
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* 优惠券 */
+        .coupon-list {
+            padding: 0 15px;
+        }
+
+        .coupon-item {
+            background: white;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            display: flex;
+        }
+
+        .coupon-left {
+            flex: 1;
+            padding: 15px;
+            border-right: 1px dashed #ddd;
+        }
+
+        .coupon-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ff6b6b;
+            margin-bottom: 5px;
+        }
+
+        .coupon-value span {
+            font-size: 14px;
+        }
+
+        .coupon-condition {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .coupon-right {
+            width: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff9f9;
+        }
+
+        .coupon-btn {
+            background: #ff6b6b;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+
+        /* 底部导航 - 修复了box-shadow属性 */
+        .tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            max-width: 500px;
+            margin: 0 auto;
+            display: flex;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 100;
+        }
+
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px 0;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .tab-item.active {
+            color: #ff6b6b;
+        }
+
+        .tab-icon {
+            font-size: 20px;
+            margin-bottom: 3px;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #999;
+        }
+
+        .empty-icon {
+            font-size: 50px;
+            margin-bottom: 15px;
+            color: #ddd;
+        }
+
+        /* 动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* 优惠券弹窗样式 */
+        .coupon-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .coupon-modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .coupon-modal {
+            background: white;
+            border-radius: 15px;
+            width: 85%;
+            max-width: 400px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            transform: translateY(20px);
+            transition: transform 0.3s ease;
+        }
+
+        .coupon-modal-overlay.active .coupon-modal {
+            transform: translateY(0);
+        }
+
+        .coupon-modal-header {
+            background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .coupon-modal-header h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .coupon-modal-header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .coupon-options {
+            padding: 20px;
+        }
+
+        .coupon-option {
+            border: 2px solid #eee;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .coupon-option:hover {
+            border-color: #ff6b6b;
+        }
+
+        .coupon-option.selected {
+            border-color: #ff6b6b;
+            background-color: #fff9f9;
+        }
+
+        .coupon-option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .coupon-option-name {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        .coupon-option-discount {
+            background: #ff6b6b;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+        }
+
+        .coupon-option-desc {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .coupon-option-validity {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .coupon-modal-actions {
+            display: flex;
+            border-top: 1px solid #eee;
+        }
+
+        .coupon-modal-btn {
+            flex: 1;
+            text-align: center;
+            padding: 15px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .coupon-modal-btn.cancel {
+            color: #666;
+            border-right: 1px solid #eee;
+        }
+
+        .coupon-modal-btn.cancel:hover {
+            background: #f5f5f5;
+        }
+
+        .coupon-modal-btn.confirm {
+            background: #ff6b6b;
+            color: white;
+            font-weight: bold;
+        }
+
+        .coupon-modal-btn.confirm:hover {
+            background: #ff5252;
+        }
+
+        /* 新增：优惠券高亮文本样式 */
+        .highlight-text {
+            color: #ff0000;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+            display: inline-block;
+            padding: 0 2px;
+            font-size: 1.3em;
+            margin-right: 3px;
+            vertical-align: baseline;
+        }
+
+        /* 新增：脉冲动画 */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+            }
+            50% {
+                transform: scale(1.05);
+                text-shadow: 0 0 10px rgba(255, 0, 0, 0.8);
+            }
+            100% {
+                transform: scale(1);
+                text-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+            }
+        }
+
+        /* 新增：管理员统计区域样式 */
+        .admin-stats {
+            display: none;
+            padding: 20px;
+            background: #f9f9f9;
+            margin: 15px;
+            border-radius: 10px;
+            border: 1px solid #ddd;
+        }
+
+        .admin-stats h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        .stats-content {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .stats-item {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .stats-item:last-child {
+            border-bottom: none;
+        }
+
+        .admin-btn {
+            width: 100%;
+            padding: 10px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            margin-top: 5px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .admin-btn:hover {
+            background: #45a049;
+        }
+
+        .admin-btn.export {
+            background: #2196F3;
+        }
+
+        .admin-btn.export:hover {
+            background: #1976D2;
+        }
+
+        .show-admin-btn {
+            background: transparent;
+            border: 1px solid #ddd;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+            color: #666;
+            cursor: pointer;
+            margin: 10px auto;
+            display: block;
+        }
+
+        .show-admin-btn:hover {
+            background: #f5f5f5;
+        }
+    </style>
+</head>
+<body>
+    <!-- 首页 -->
+    <div id="home-page" class="page active">
+        <div class="header">
+            <h1>校园文创咖啡</h1>
+        </div>
+
+        <!-- 轮播图 -->
+        <div class="banner-container">
+            <div class="banner" id="banner">
+               <div class="banner-item" style="background-image: url('images/图片1.png');"></div>
+            </div>
+            <div class="banner-indicators" id="indicators">
+                <div class="indicator active"></div>
+                <div class="indicator"></div>
+                <div class="indicator"></div>
+            </div>
+        </div>
+
+        <!-- 产品分类1 -->
+        <div class="section-title">
+            四周年活动
+            <span>查看全部</span>
+        </div>
+        <div class="category-grid">
+            <!-- 修复：添加data-product属性 -->
+            <div class="category-item" data-product="osmanthus">
+                <div class="category-img" style="background-image: url('images/桂花酒酿美式.png');"></div>
+                <div class="category-info">
+                    <div class="category-name">桂花酒酿美式</div>
+                    <div class="category-price">¥9.9</div>
+                </div>
+            </div>
+            <div class="category-item" data-product="vanilla">
+                <div class="category-img" style="background-image: url('images/香草冰美式.png');"></div>
+                <div class="category-info">
+                    <div class="category-name">香草冰美式</div>
+                    <div class="category-price">¥9.9</div>
+                </div>
+            </div>
+            <div class="category-item" data-product="jasmine">
+                <div class="category-img" style="background-image: url('images/茉莉厚乳拿铁.png');"></div>
+                <div class="category-info">
+                    <div class="category-name">茉莉厚乳拿铁</div>
+                    <div class="category-price">¥9.9</div>
+                </div>
+            </div>
+            <div class="category-item" data-product="cheese">
+                <div class="category-img" style="background-image: url('images/轻芝士拿铁.png');"></div>
+                <div class="category-info">
+                    <div class="category-name">轻芝士拿铁</div>
+                    <div class="category-price">¥9.9</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 管理员入口 -->
+        <button class="show-admin-btn" id="show-admin-stats">管理员统计</button>
+
+        <!-- 管理员统计区域 -->
+        <div class="admin-stats" id="admin-stats">
+            <h3>优惠券统计</h3>
+            <div class="stats-content" id="stats-content">
+                <!-- 统计内容将通过JavaScript动态生成 -->
+            </div>
+            <button class="admin-btn" id="refresh-stats">刷新统计</button>
+            <button class="admin-btn export" id="export-stats">导出数据</button>
+        </div>
+    </div>
+
+     <!-- 产品详情页 -->
+    <div id="product-page" class="page">
+        <div class="header">
+            <button class="back-btn">← 返回</button>
+            <h1>产品详情</h1>
+        </div>
+
+        <div class="product-detail">
+            <div class="product-image" id="product-image"></div>
+            <div class="product-info">
+                <div class="product-name" id="product-name">产品名称</div>
+                <div class="product-description" id="product-description">产品描述</div>
+                <div class="product-price" id="product-price">¥0.00</div>
+
+                <!-- 杯型选择 -->
+                <div class="option-group">
+                    <div class="option-title">
+                        <span>杯型</span>
+                        <span class="option-required">必选</span>
+                    </div>
+                    <div class="option-items">
+                        <div class="option-item" data-option="cup" data-value="medium">中杯</div>
+                        <div class="option-item" data-option="cup" data-value="large">大杯</div>
+                    </div>
+                </div>
+
+                <!-- 温度选择 -->
+                <div class="option-group">
+                    <div class="option-title">
+                        <span>温度</span>
+                        <span class="option-required">必选</span>
+                    </div>
+                    <div class="option-items">
+                        <div class="option-item" data-option="temperature" data-value="ice">冰</div>
+                        <div class="option-item" data-option="temperature" data-value="hot">热</div>
+                    </div>
+                </div>
+
+                <!-- 糖度选择 -->
+                <div class="option-group">
+                    <div class="option-title">
+                        <span>糖度</span>
+                        <span class="option-required">必选</span>
+                    </div>
+                    <div class="option-items">
+                        <div class="option-item" data-option="sugar" data-value="30">3分糖</div>
+                        <div class="option-item" data-option="sugar" data-value="50">5分糖</div>
+                        <div class="option-item" data-option="sugar" data-value="70">7分糖</div>
+                        <div class="option-item" data-option="sugar" data-value="100">全糖</div>
+                    </div>
+                </div>
+
+                <button class="add-to-cart-btn" id="add-to-cart">加入购物车</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 我的页面 -->
+    <div id="profile-page" class="page">
+        <div class="header">
+            <h1>校园文创咖啡</h1>
+        </div>
+
+        <!-- 购物车 -->
+        <div class="section-title">我的购物车</div>
+        <div id="cart-container">
+            <div class="cart-item">
+                <div class="cart-img" style="background-image: url('images/桂花酒酿美式.png');"></div>
+                <div class="cart-info">
+                    <div class="cart-name">桂花酒酿美式</div>
+                    <div class="cart-price">¥9.9</div>
+                    <div class="cart-actions">
+                        <div class="quantity-control">
+                            <div class="quantity-btn">-</div>
+                            <div class="quantity">1</div>
+                            <div class="quantity-btn">+</div>
+                        </div>
+                        <div class="delete-btn">删除</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="cart-item">
+                <div class="cart-img" style="background-image: url('images/茉莉厚乳拿铁.png');"></div>
+                <div class="cart-info">
+                    <div class="cart-name">茉莉厚乳拿铁</div>
+                    <div class="cart-price">¥9.9</div>
+                    <div class="cart-actions">
+                        <div class="quantity-control">
+                            <div class="quantity-btn">-</div>
+                            <div class="quantity">1</div>
+                            <div class="quantity-btn">+</div>
+                        </div>
+                        <div class="delete-btn">删除</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- 优惠券 -->
+        <div class="section-title">我的优惠券</div>
+        <div class="coupon-list" id="user-coupons">
+
+        </div>
+    </div>
+
+    <!-- 底部导航 -->
+    <div class="tab-bar">
+        <div class="tab-item active" data-page="home-page">
+            <div class="tab-icon">🏠</div>
+            <div>首页</div>
+        </div>
+        <div class="tab-item" data-page="profile-page">
+            <div class="tab-icon">👤</div>
+            <div>我的</div>
+        </div>
+    </div>
+
+    <!-- 优惠券弹窗 -->
+    <div class="coupon-modal-overlay" id="couponModal">
+        <div class="coupon-modal">
+            <div class="coupon-modal-header">
+                <h2>专属优惠券</h2>
+                <p>限时领取，先到先得</p>
+            </div>
+            <div class="coupon-options">
+                <div class="coupon-option" data-type="single">
+                    <div class="coupon-option-header">
+                        <div class="coupon-option-name">单人折扣卡</div>
+                        <div class="coupon-option-discount">7折</div>
+                    </div>
+                    <div class="coupon-option-desc">全场商品单人购买，<span class="highlight-text">独享</span>七折优惠</div>
+                    <div class="coupon-option-validity">有效期至：2025-12-31</div>
+                </div>
+                <div class="coupon-option" data-type="group">
+                    <div class="coupon-option-header">
+                        <div class="coupon-option-name">团购折扣</div>
+                        <div class="coupon-option-discount">7折</div>
+                    </div>
+                    <div class="coupon-option-desc">2人及以上团购，<span class="highlight-text">共享</span>七折优惠</div>
+                    <div class="coupon-option-validity">有效期至：2025-12-31</div>
+                </div>
+            </div>
+            <div class="coupon-modal-actions">
+                <div class="coupon-modal-btn confirm">立即领取</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 产品数据
+        const products = {
+            osmanthus: {
+                name: '桂花酒酿美式',
+                description: '精选优质咖啡豆与桂花酒酿完美融合，口感醇厚，香气独特，带来全新的咖啡体验。',
+                price: 9.9,
+                imageUrl: 'images/桂花酒酿美式.png'
+            },
+            vanilla: {
+                name: '香草冰美式',
+                description: '清新香草与浓郁咖啡的完美结合，冰爽口感，带来夏日清凉体验。',
+                price: 9.9,
+                imageUrl: 'images/香草冰美式.png'
+            },
+            jasmine: {
+                name: '茉莉厚乳拿铁',
+                description: '茉莉花香与丝滑厚乳的绝妙搭配，口感丰富，香气怡人。',
+                price: 9.9,
+                imageUrl: 'images/茉莉厚乳拿铁.png'
+            },
+            cheese: {
+                name: '轻芝士拿铁',
+                description: '轻盈芝士与醇香咖啡的完美融合，口感丝滑，回味无穷。',
+                price: 9.9,
+                imageUrl: 'images/轻芝士拿铁.png'
+            }
+        };
+
+        // 优惠券统计数据结构
+        const couponStatistics = {
+            single: {
+                count: 0,
+                users: [] // 可以存储用户ID或其他标识
+            },
+            group: {
+                count: 0,
+                users: []
+            },
+            totalUsers: 0
+        };
+
+        // 用户标识（简单实现，实际项目中应该使用更复杂的用户识别）
+        let currentUserId = generateUserId();
+
+        // 生成简单用户ID
+        function generateUserId() {
+            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+
+        // 存储统计数据到localStorage
+        function saveStatisticsToStorage() {
+            localStorage.setItem('couponStatistics', JSON.stringify(couponStatistics));
+        }
+
+        // 从localStorage加载统计数据
+        function loadStatisticsFromStorage() {
+            const saved = localStorage.getItem('couponStatistics');
+            if (saved) {
+                const parsed = JSON.parse(saved);
+                Object.assign(couponStatistics, parsed);
+            }
+        }
+
+        // 更新统计数据
+        function updateCouponStatistics(couponType) {
+            // 防止重复统计（简单去重）
+            if (!couponStatistics[couponType].users.includes(currentUserId)) {
+                couponStatistics[couponType].count++;
+                couponStatistics[couponType].users.push(currentUserId);
+
+                // 计算总独立用户数
+                const allUsers = new Set([
+                    ...couponStatistics.single.users,
+                    ...couponStatistics.group.users
+                ]);
+                couponStatistics.totalUsers = allUsers.size;
+
+                saveStatisticsToStorage();
+                console.log('优惠券统计已更新:', couponStatistics);
+            }
+        }
+
+        // 获取统计数据（供管理员查看）
+        function getCouponStatistics() {
+            return {
+                singleCount: couponStatistics.single.count,
+                groupCount: couponStatistics.group.count,
+                totalUsers: couponStatistics.totalUsers,
+                singlePercentage: couponStatistics.totalUsers > 0 ?
+                    (couponStatistics.single.count / couponStatistics.totalUsers * 100).toFixed(2) : '0.00',
+                groupPercentage: couponStatistics.totalUsers > 0 ?
+                    (couponStatistics.group.count / couponStatistics.totalUsers * 100).toFixed(2) : '0.00'
+            };
+        }
+
+        // 导出统计数据
+        function exportStatistics() {
+            const stats = getCouponStatistics();
+            const data = {
+                ...stats,
+                rawData: couponStatistics,
+                exportTime: new Date().toISOString()
+            };
+
+            const dataStr = JSON.stringify(data, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+
+            // 创建下载链接
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(dataBlob);
+            link.download = `coupon_stats_${new Date().toISOString().split('T')[0]}.json`;
+            link.click();
+
+            alert('统计数据已导出！');
+        }
+
+        // 页面切换
+        document.querySelectorAll('.tab-item').forEach(tab => {
+            tab.addEventListener('click', function() {
+                // 更新活跃标签
+                document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
+
+                // 切换页面
+                const pageId = this.getAttribute('data-page');
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active', 'fade-in');
+                });
+
+                const activePage = document.getElementById(pageId);
+                activePage.classList.add('active', 'fade-in');
+            });
+        });
+
+        // 轮播图功能
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.banner-item');
+        const indicators = document.querySelectorAll('.indicator');
+        const banner = document.getElementById('banner');
+
+        function showSlide(index) {
+            if (index >= slides.length) index = 0;
+            if (index < 0) index = slides.length - 1;
+
+            currentSlide = index;
+            banner.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+            // 更新指示器
+            indicators.forEach((indicator, i) => {
+                indicator.classList.toggle('active', i === currentSlide);
+            });
+        }
+
+        // 自动轮播
+        setInterval(() => {
+            showSlide(currentSlide + 1);
+        }, 3000);
+
+        // 初始化轮播图
+        showSlide(0);
+
+         // 产品详情页功能
+        const productItems = document.querySelectorAll('.category-item');
+        const productPage = document.getElementById('product-page');
+        const backBtn = document.querySelector('.back-btn');
+        const productImage = document.getElementById('product-image');
+        const productName = document.getElementById('product-name');
+        const productDescription = document.getElementById('product-description');
+        const productPrice = document.getElementById('product-price');
+        const addToCartBtn = document.getElementById('add-to-cart');
+
+        // 点击产品进入详情页
+        productItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const productId = this.getAttribute('data-product');
+                const product = products[productId];
+
+                // 更新产品详情
+                productImage.style.backgroundImage = `url('${product.imageUrl}')`;
+                productName.textContent = product.name;
+                productDescription.textContent = product.description;
+                productPrice.textContent = `¥${product.price}`;
+
+               // 切换到产品详情页
+                document.querySelectorAll('.page').forEach(page => {
+                    page.classList.remove('active', 'fade-in');
+                });
+                productPage.classList.add('active', 'fade-in');
+            });
+        });
+
+        // 返回按钮
+        backBtn.addEventListener('click', function() {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active', 'fade-in');
+            });
+            document.getElementById('home-page').classList.add('active', 'fade-in');
+        });
+
+        // 选项选择
+        const optionItems = document.querySelectorAll('.option-item');
+        optionItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const optionType = this.getAttribute('data-option');
+                const optionValue = this.getAttribute('data-value');
+
+                // 移除同类型选项的选中状态
+                document.querySelectorAll(`.option-item[data-option="${optionType}"]`).forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+
+                // 设置当前选项为选中状态
+                this.classList.add('selected');
+            });
+        });
+
+        // 加入购物车功能
+        addToCartBtn.addEventListener('click', function() {
+            // 获取选中的选项
+            const selectedCup = document.querySelector('.option-item[data-option="cup"].selected');
+            const selectedTemperature = document.querySelector('.option-item[data-option="temperature"].selected');
+            const selectedSugar = document.querySelector('.option-item[data-option="sugar"].selected');
+
+            // 检查是否所有选项都已选择
+            if (!selectedCup || !selectedTemperature || !selectedSugar) {
+                alert('请选择杯型、温度和糖度');
+                return;
+            }
+
+            // 获取选项值
+            const cupText = selectedCup.textContent;
+            const temperatureText = selectedTemperature.textContent;
+            const sugarText = selectedSugar.textContent;
+
+            // 显示成功提示
+            alert(`已成功将${productName.textContent}(${cupText}/${temperatureText}/${sugarText})加入购物车`);
+
+            // 返回首页
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active', 'fade-in');
+            });
+            document.getElementById('home-page').classList.add('active', 'fade-in');
+        });
+
+        // 购物车数量控制
+        document.querySelectorAll('.quantity-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const quantityElement = this.parentElement.querySelector('.quantity');
+                let quantity = parseInt(quantityElement.textContent);
+
+                if (this.textContent === '+') {
+                    quantity++;
+                } else if (this.textContent === '-' && quantity > 1) {
+                    quantity--;
+                }
+
+                quantityElement.textContent = quantity;
+            });
+        });
+
+        // 删除购物车商品
+        document.querySelectorAll('.delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.closest('.cart-item').style.opacity = '0';
+                setTimeout(() => {
+                    this.closest('.cart-item').remove();
+                    // 如果购物车为空，显示空状态
+                    if (document.querySelectorAll('.cart-item').length === 0) {
+                        const cartContainer = document.getElementById('cart-container');
+                        cartContainer.innerHTML = `
+                            <div class="empty-state">
+                                <div class="empty-icon">🛒</div>
+                                <div>购物车是空的</div>
+                                <div style="margin-top: 10px; font-size: 14px;">快去首页挑选商品吧</div>
+                            </div>
+                        `;
+                    }
+                }, 300);
+            });
+        });
+
+        // 优惠券弹窗功能
+        const couponModal = document.getElementById('couponModal');
+        const couponOptions = document.querySelectorAll('.coupon-option');
+        let selectedCouponType = null;
+
+        // 5秒后显示优惠券弹窗
+        setTimeout(() => {
+            couponModal.classList.add('active');
+        }, 5000);
+
+        // 优惠券选择
+        couponOptions.forEach(option => {
+            option.addEventListener('click', function() {
+                // 移除其他选项的选中状态
+                couponOptions.forEach(opt => opt.classList.remove('selected'));
+                // 设置当前选项为选中状态
+                this.classList.add('selected');
+                // 记录选中的优惠券类型
+                selectedCouponType = this.getAttribute('data-type');
+            });
+        });
+
+
+        // 确认领取按钮
+        document.querySelector('.coupon-modal-btn.confirm').addEventListener('click', function() {
+            if (!selectedCouponType) {
+                alert('请先选择一种优惠券');
+                return;
+            }
+
+            // 根据选择的优惠券类型创建新的优惠券
+            const couponData = {
+                single: {
+                    name: '单人折扣卡',
+                    discount: '7折',
+                    condition: '单人购买享7折',
+                    validity: '2025-12-31'
+                },
+                group: {
+                    name: '团购折扣',
+                    discount: '7折',
+                    condition: '2人及以上团购',
+                    validity: '2025-12-31'
+                }
+            };
+
+            const selectedCoupon = couponData[selectedCouponType];
+
+            // 创建新的优惠券HTML
+            const newCoupon = document.createElement('div');
+            newCoupon.className = 'coupon-item';
+            newCoupon.innerHTML = `
+                <div class="coupon-left">
+                    <div class="coupon-value">${selectedCoupon.discount} <span>${selectedCoupon.condition}</span></div>
+                    <div class="coupon-condition">有效期至 ${selectedCoupon.validity}</div>
+                </div>
+                <div class="coupon-right">
+                    <div class="coupon-btn">立即使用</div>
+                </div>
+            `;
+
+            // 添加到优惠券列表
+            const couponList = document.getElementById('user-coupons');
+            couponList.appendChild(newCoupon);
+
+            // 更新统计数据
+            updateCouponStatistics(selectedCouponType);
+
+            // 显示领取成功消息
+            alert(`成功领取${selectedCoupon.name}！`);
+
+            // 关闭弹窗
+            couponModal.classList.remove('active');
+        });
+
+        // 管理员统计功能
+        const adminStats = document.getElementById('admin-stats');
+        const showAdminStatsBtn = document.getElementById('show-admin-stats');
+        const statsContent = document.getElementById('stats-content');
+        const refreshStatsBtn = document.getElementById('refresh-stats');
+        const exportStatsBtn = document.getElementById('export-stats');
+
+        // 显示/隐藏管理员统计
+        showAdminStatsBtn.addEventListener('click', function() {
+            if (adminStats.style.display === 'none') {
+                adminStats.style.display = 'block';
+                updateStatsDisplay();
+                this.textContent = '隐藏统计';
+            } else {
+                adminStats.style.display = 'none';
+                this.textContent = '管理员统计';
+            }
+        });
+
+        // 刷新统计数据
+        refreshStatsBtn.addEventListener('click', updateStatsDisplay);
+
+        // 导出统计数据
+        exportStatsBtn.addEventListener('click', exportStatistics);
+
+        // 更新统计显示
+        function updateStatsDisplay() {
+            const stats = getCouponStatistics();
+
+            statsContent.innerHTML = `
+                <div class="stats-item">
+                    <strong>单人折扣卡：</strong>
+                    <span>${stats.singleCount} 人 (${stats.singlePercentage}%)</span>
+                </div>
+                <div class="stats-item">
+                    <strong>团购折扣：</strong>
+                    <span>${stats.groupCount} 人 (${stats.groupPercentage}%)</span>
+                </div>
+                <div class="stats-item">
+                    <strong>总领取人数：</strong>
+                    <span>${stats.totalUsers} 人</span>
+                </div>
+                <div style="background: #e3f2fd; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 14px;">
+                    <strong>数据分析：</strong><br>
+                    ${stats.singleCount > stats.groupCount ?
+                        '更多用户选择了单人折扣卡，说明个人消费需求较大' :
+                        '更多用户选择了团购折扣，说明社交消费需求较大'}
+                </div>
+            `;
+        }
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            loadStatisticsFromStorage();
+            console.log('优惠券统计系统已初始化');
+            console.log('当前统计数据:', couponStatistics);
+        });
+    </script>
+</body>
+</html>
